@@ -14,10 +14,10 @@ A 2D Unity game where players control a paddle to catch falling shapes (Circle, 
 
 
 #Requirements
-1. Unity Version:Unity6000+
+1. Unity Version: Unity 6000.0+
 2. Platforms: Windows, Android
 - Dependencies:
-3. DOTween (add via Package Manager)
+3. Add DOTween Package
 4. prites for Circle, Square, Squircle, Rhombus (user-provided)
 5. Shape prefabs and UI elements (user-provided)
 
