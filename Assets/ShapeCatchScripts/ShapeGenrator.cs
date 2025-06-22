@@ -101,6 +101,13 @@ namespace ShapeCatcher
             for (int i = 0; i < allActiveShapes.Count; i++)
             {
                 GameObject item = allActiveShapes[i];
+                if (item.transform.parent != null && item.transform.parent.CompareTag("Player"))
+                {
+                    Debug.LogError("item Remove From List");
+                    allActiveShapes.Remove(item);
+                    continue;
+                }
+
                 if (item.transform.position.y < -_mainCamera.orthographicSize - _yOffset)
                 {
                     ReturnToPool(item);

@@ -4,7 +4,6 @@ namespace ShapeCatcher
 {
     public class ShapePooler : MonoBehaviour
     {
-        // public ShapePool[] shapePools;
         public ShapePoolSO[] shapePools;
 
         private void Awake()
@@ -66,6 +65,9 @@ namespace ShapeCatcher
         public void GetTargetIndexAndShape(out Sprite sprite, out int targetindex)
         {
             ShapePoolSO shape = shapePools[Random.Range(0, shapePools.Length)];
+// #if UNITY_EDITOR
+//             shape = shapePools[0];
+// #endif
             GameObject shapeprefab = shape.GetPrefab;
             Shape shapeScript = shapeprefab.GetComponent<Shape>();
             targetindex = shape.GetIndex;

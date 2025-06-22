@@ -1,6 +1,7 @@
 using System;
 using DG.Tweening;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace ShapeCatcher
@@ -12,11 +13,12 @@ namespace ShapeCatcher
         private Camera _mainCamera;
         private float _offsetHeight = 1f;
         private BoxCollider2D _boxCollider;
-        private float _xExtent;
+        // private float _xExtent;
         private int _targetIndex;
         private int _currentScore = 0;
         private bool _isGameEnd = false;
         [SerializeField] private float _speed = 10f;
+        [SerializeField] private float _xoffset = 0.5f;
         public static EventHandler<string> UpdateScoreText;
         public static EventHandler GameEnd;
         private void Start()
@@ -24,10 +26,8 @@ namespace ShapeCatcher
             _currentScore = 0;
             _mainCamera = Camera.main;
             _boxCollider = transform.GetComponent<BoxCollider2D>();
-            _xExtent = _boxCollider.bounds.extents.x;
             _screenWidth = _mainCamera.aspect * _mainCamera.orthographicSize;
             transform.position = new Vector3(0, -_mainCamera.orthographicSize + _offsetHeight, 0);
-
             ShapeGenrator.SetTargetIndex += SetTargetIndex;
         }
 
@@ -39,11 +39,10 @@ namespace ShapeCatcher
             if (Input.GetMouseButton(0))
             {
                 Vector2 targetposition = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
-                float xPosition = Mathf.Clamp(targetposition.x, -_screenWidth + _xExtent, _screenWidth - _xExtent);
+                float xPosition = Mathf.Clamp(targetposition.x, -_screenWidth + _xoffset, _screenWidth - _xoffset);
                 targetposition = new Vector3(xPosition, transform.position.y, 0);
                 if (Mathf.Abs(xPosition - transform.position.x) >= 0.5f)
                 {
-                    // Debug.Log("Distance|" + Vector2.Distance(targetposition, transform.position));
                     transform.position = Vector3.Lerp(transform.position, targetposition, Time.deltaTime * _speed);
                 }
                 else
@@ -67,7 +66,10 @@ namespace ShapeCatcher
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (!collision.transform.TryGetComponent<Shape>(out Shape shape) && _isGameEnd)
+            if (_isGameEnd && !collision.transform.CompareTag("Player"))
+                return;
+
+            if (!collision.transform.TryGetComponent<Shape>(out Shape shape))
                 return;
 
 
@@ -78,10 +80,14 @@ namespace ShapeCatcher
                 string newString = "Score:" + _currentScore.ToString();
                 UpdateScoreText?.Invoke(this, newString);
                 Transform collidedobject = collision.transform;
-                collidedobject.GetComponent<Rigidbody2D>().gravityScale = 0;
+                Rigidbody2D rb = collidedobject.GetComponent<Rigidbody2D>();
+                rb.gravityScale = 0;
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                rb.linearVelocity = Vector2.zero;
+                collidedobject.transform.GetComponent<Collider2D>().enabled = false;
                 collidedobject.SetParent(this.transform);
-                collision.collider.isTrigger = true;
-                
+
+
             }
             else
             {
